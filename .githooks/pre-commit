@@ -1,0 +1,26 @@
+#!/bin/sh
+
+echo "Running pre-commit checks..."
+
+# Получаем список изменённых файлов
+FILES=$(git diff --cached --name-only)
+
+# Проверяем каждый файл, кроме самого хука
+for FILE in $FILES; do
+    # Пропускаем .githooks/pre-commit
+    if [ "$FILE" = ".githooks/pre-commit" ]; then
+        continue
+    fi
+
+    # Проверяем на console.log
+    if grep -E "console\.(log|debug|info|warn|error)" "$FILE" > /dev/null; then
+        echo "❌ Found console.log statements in $FILE. Please remove them."
+        echo "Files with console.log:"
+        $FILES | xargs grep -l "console\."
+
+        exit 1
+    fi
+done
+
+echo "✅ No console.log statements found."
+exit 0
