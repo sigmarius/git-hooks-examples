@@ -1,0 +1,30 @@
+#!/bin/sh
+# .git/hooks/commit-msg
+
+commit_regex='^(feat|fix|docs|test|chore)(\([a-z]+\))?: .{1,50}$'
+error_msg="❌ Commit message doesn't follow conventions
+
+Format: (): 
+
+Types:
+  feat:     New feature
+  fix:      Bug fix
+  docs:     Documentation changes
+  test:     Test updates
+  chore:    Build process or auxiliary tool changes
+
+Example: feat(auth): add OAuth2 integration"
+
+if ! grep -qE "$commit_regex" "$1"; then
+    echo "$error_msg" >&2
+    exit 1
+fi
+
+# Проверка длины первой строки
+first_line=$(head -n1 "$1")
+if [ ${#first_line} -gt 72 ]; then
+    echo "❌ First line of commit message is too long (${#first_line} > 72)"
+    exit 1
+fi
+
+echo "✅ Commit message validation passed"
